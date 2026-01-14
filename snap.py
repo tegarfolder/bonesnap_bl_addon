@@ -1,13 +1,26 @@
+bl_info = {
+    "name": "BoneSnap Addon",
+    "author": "Putra Tegar",
+    "version": (0, 5, 0),
+    "blender": (3, 0, 0),
+    "location": "View3D > Tool Shelf > Anti Slide",
+    "description": "Tools for snapping and unsnapping bones with constraints.",
+    "warning": "",
+    "wiki_url": "",
+    "category": "Animation",
+}
+
 import bpy
 from mathutils import Matrix
 
-# Global properties untuk toggle di panel
+# Global properties for toggles in the panel
 def update_follow_rotation(self, context):
-    pass # Placeholder jika nanti butuh callback
+    pass  # Placeholder for callback if needed
 
 def update_add_constraints(self, context):
-    pass # Placeholder jika nanti butuh callback
+    pass  # Placeholder for callback if needed
 
+# Define properties
 bpy.types.Scene.bone_tool_follow_rotation = bpy.props.BoolProperty(
     name="Follow Bone Rotation",
     description="Make the empty follow the rotation of the selected bone",
@@ -22,24 +35,22 @@ bpy.types.Scene.bone_tool_add_constraints = bpy.props.BoolProperty(
     update=update_add_constraints
 )
 
-# Properti baru untuk offset keyframe
 bpy.types.Scene.bone_tool_keyframe_offset = bpy.props.IntProperty(
     name="Snap Smoothness",
     description="Number of frames before current frame to place the initial keyframe for snap",
     default=1,
     min=1,
-    max=10,  # Tidak bisa negatif
-    update=lambda self, context: None # Placeholder update
+    max=10,
+    update=lambda self, context: None
 )
 
-# Properti baru untuk offset keyframe unsnap
 bpy.types.Scene.bone_tool_unsnap_offset = bpy.props.IntProperty(
     name="Unsnap Smoothness",
     description="Number of frames after current frame to place the final keyframe for unsnap",
     default=5,
     min=1,
-    max=10,  # Tidak bisa negatif
-    update=lambda self, context: None # Placeholder update
+    max=10,
+    update=lambda self, context: None
 )
 
 bpy.types.Scene.tweak_pose_set_inverse = bpy.props.BoolProperty(
@@ -51,6 +62,7 @@ bpy.types.Scene.tweak_pose_set_inverse = bpy.props.BoolProperty(
 bpy.types.Scene.is_update_prepared = bpy.props.BoolProperty(default=False)
 bpy.types.Scene.temp_target_empty_name = bpy.props.StringProperty()
 
+# Define operators
 class POSE_OT_add_empty_to_bone(bpy.types.Operator):
     """Add Empty Arrow to selected bone position with optional rotation and add constraints"""
     bl_idname = "pose.add_empty_to_bone"
@@ -764,6 +776,7 @@ classes = (
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
+
 
 def unregister():
     for cls in reversed(classes):
