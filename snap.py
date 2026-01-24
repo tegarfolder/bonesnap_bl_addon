@@ -669,6 +669,8 @@ class POSE_OT_tweak_pose(bpy.types.Operator):
                 print("Could not return to Pose mode after error in tweak_pose.")
             return {'CANCELLED'}
 
+# PANEL ------------------------------------------------------------------------------
+
 class POSE_OT_bake_action(bpy.types.Operator):
     """Baking edited action."""
     bl_idname = "pose.bake_action"
