@@ -669,19 +669,64 @@ class POSE_OT_tweak_pose(bpy.types.Operator):
                 print("Could not return to Pose mode after error in tweak_pose.")
             return {'CANCELLED'}
 
+class POSE_OT_bake_action(bpy.types.Operator):
+    """Baking edited action."""
+    bl_idname = "pose.bake_action"
+    bl_label = "Bake Action"
+    bl_description = "Baking Edited Action."
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    @classmethod
+    def poll(cls, context):
+        # Enable if in pose mode and has an active bone selected
+        return (context.mode == 'OBJECT' and 
+                context.active_object and 
+                context.active_object.type == 'ARMATURE')
+
+    def execute(self, context):
+        # DAPATKAN NILAI FRAME DARI SCENE
+        frameStart = context.scene.frame_start
+        frameEnd = context.scene.frame_end
+        
+        self.report({'INFO'}, f"Baking from frame {frameStart} to {frameEnd}")
+        
+        bpy.ops.object.mode_set(mode='POSE')
+        bpy.ops.pose.select_all(action='SELECT')
+        
+        try:
+            bpy.ops.nla.bake(
+                frame_start=frameStart,
+                frame_end=frameEnd,
+                step=1,
+                only_selected=True,
+                visual_keying=True,
+                clear_constraints=True,
+                clear_parents=False,
+                use_current_action=True,
+                bake_types={'POSE'}
+            )
+            
+            self.report({'INFO'}, f"✅ Successfully baked action from frame {frame_start} to {frame_end}!")
+            return {'FINISHED'}
+            
+        except Exception as e:
+            self.report({'ERROR'}, f"Baking failed: {str(e)}")
+            return {'CANCELLED'}
+
 class VIEW3D_PT_bone_empty_panel(bpy.types.Panel):
     """Creates a panel in the 3D Viewport"""
-    bl_label = "Anti Slide"
+    bl_label = "BoneSnap"
     bl_idname = "VIEW3D_PT_bone_empty_panel"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = "Anti Slide"
+    bl_category = "BoneSnap"
 
     def draw(self, context):
         layout = self.layout
         col = layout.column()
         box1 = layout.box()
         box2 = layout.box()
+        box3 = layout.box()
         
         # Check if in pose mode with an armature selected
         is_pose_mode_armature = (context.mode == 'POSE' and 
@@ -751,15 +796,10 @@ class VIEW3D_PT_bone_empty_panel(bpy.types.Panel):
             c2.scale_y = 1.5
             c2.operator("pose.unsnap_influence", text="Unsnap", icon='SNAP_OFF')
             
-            box2.separator()
-            coli = box2.column(align=True)
+            coli = box3.column(align=True)
             coli.prop(context.scene, "tweak_pose_set_inverse", text="Set Inverse")
             coli.operator("pose.tweak_pose", text="Tweak", icon="POSE_HLT")
-#        else:
-#            # Opsional: beri indikasi bahwa kontrol lain dinonaktifkan
-#            row = box.row()
-#            row.label(text="Adjust Empty, then Apply", icon='INFO')
-            # Tombol-tombol lain tidak muncul karena row-nya disembunyikan
+            coli.operator("pose.bake_action", text="Bake", icon="DISC")
 
 
 # Registration
@@ -771,6 +811,7 @@ classes = (
     POSE_OT_continue_update_empty,
     POSE_OT_tweak_pose,
     VIEW3D_PT_bone_empty_panel,
+    POSE_OT_bake_action,
 )
 
 def register():
